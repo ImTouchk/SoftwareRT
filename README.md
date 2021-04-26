@@ -1,3 +1,5 @@
+![Example image](image.png?raw=true "Raytracer showcase")
+
 **SoftwareRT** is an extremely basic multi-threaded software raytracer written in pure C++. The code is based off of the book 'Ray Tracing in One Weekend',
 so it is a very naive (and slow) implementation. However, the program uses multi-threading in order to scale well with modern processors. 
 
