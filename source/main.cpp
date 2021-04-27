@@ -15,7 +15,7 @@ struct point2 {
     int x, y;
 };
 
-constexpr auto aspect_ratio     = 3.0 / 2.0;
+constexpr auto aspect_ratio     = 16.0 / 9.0;
 constexpr int image_width       = 400;
 constexpr int image_height      = static_cast<int>(image_width / aspect_ratio);
 constexpr int samples_per_pixel = 10;
@@ -64,12 +64,12 @@ static hittable_list random_scene()
             if ((center - point3(4, 0.2, 0)).length() > 0.9) {
                 shared_ptr<material> sphere_material;
 
-                if (choose_mat < 0.8) {
+                if (choose_mat < 0.60) {
                     // diffuse
                     auto albedo     = color::random() * color::random();
                     sphere_material = make_shared<lambertian>(albedo);
                     world.add(make_shared<sphere>(center, 0.2, sphere_material));
-                } else if (choose_mat < 0.95) {
+                } else if (choose_mat < 0.75) {
                     // metal
                     auto albedo     = color::random(0.5, 1);
                     auto fuzz       = random_double(0, 0.5);
@@ -96,8 +96,10 @@ static hittable_list random_scene()
     return world;
 }
 
-static std::queue<int>    lineQueue;
-static std::mutex         queueMutex;
+static std::queue<int> lineQueue;
+static std::mutex      queueMutex;
+static std::mutex      flagMutex;
+static unsigned        threadsFinished = 0;
 static void WorkerThread(camera& cam, hittable& world)
 {
     while(true) {
@@ -106,6 +108,8 @@ static void WorkerThread(camera& cam, hittable& world)
         {
             std::unique_lock<std::mutex> lock(queueMutex);
             if(lineQueue.empty()) {
+                std::unique_lock<std::mutex> flagLock(flagMutex);
+                threadsFinished++;
                 return;
             }
             line = lineQueue.front();
@@ -194,6 +198,8 @@ int main() {
     }
 
     const unsigned threadCount       = std::thread::hardware_concurrency();
+    std::cerr << "Using " << threadCount <<  " threads...\r\n";
+
     std::vector<std::thread> threads(0);
     for(unsigned i = 0; i < threadCount; i++) {
         threads.push_back(
@@ -202,8 +208,8 @@ int main() {
     }
 
     while(true) {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        if(lineQueue.empty()) {
+        std::unique_lock<std::mutex> flagLock(flagMutex);
+        if(threadsFinished == threadCount) {
             std::cerr << "\r\nImage created. Writing to file...\r\n";
             break;
         }
