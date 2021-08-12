@@ -7,8 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(CMAKE_BUILD_TYPE EQUAL "DEBUG")
     if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND MSVC)
-        add_compile_options(/arch:AVX2)
-        add_compile_options(/Ox)
+        add_compile_options(/arch:AVX2 /O2)
     endif()
 endif()
 
