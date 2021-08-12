@@ -255,12 +255,24 @@ int main() {
 
     std::cerr << "Info: Writing output to file.\n";
 
+    const std::time_t now = std::time(nullptr);
+    const std::tm calendarTime = *std::localtime(std::addressof(now));
+
+    // Filename: MM-DD HH:MM:SS
     std::string out = std::format(
-        "{}.ppm", 
-        std::chrono::system_clock::now().time_since_epoch().count()
+        "{}.{} {}:{}:{}", 
+        calendarTime.tm_mon,
+        calendarTime.tm_mday,
+        calendarTime.tm_hour,
+        calendarTime.tm_min,
+        calendarTime.tm_sec
     );
 
-    write_as_ppm(pBuffer, prefs, out.c_str());
+    std::string out_ppm = out + ".ppm";
+    std::string out_bmp = out + ".bmp";
+
+    write_as_ppm(pBuffer, prefs, out_ppm.c_str());
+    //write_as_bmp(pBuffer, prefs, out_bmp.c_str());
     
     delete[] pBuffer;
     return 0;
