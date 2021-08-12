@@ -5,6 +5,7 @@
 #include "sphere.h"
 #include "camera.h"
 
+#include <format>
 #include <chrono>
 #include <queue>
 #include <thread>
@@ -22,7 +23,7 @@ constexpr int samples_per_pixel = 10;
 constexpr int max_depth         = 50;
 
 static color buffer[image_width][image_height];
-static color ray_color(const ray& r, const hittable& world, int depth)
+color ray_color(const ray& r, const hittable& world, int depth)
 {
     hit_record rec;
 
@@ -45,7 +46,7 @@ static color ray_color(const ray& r, const hittable& world, int depth)
     return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
 }
 
-static hittable_list random_scene()
+hittable_list random_scene()
 {
     hittable_list world;
 
@@ -100,7 +101,7 @@ static std::queue<int> lineQueue;
 static std::mutex      queueMutex;
 static std::mutex      flagMutex;
 static unsigned        threadsFinished = 0;
-static void WorkerThread(camera& cam, hittable& world)
+void WorkerThread(camera& cam, hittable& world)
 {
     while(true) {
         int line;
@@ -153,7 +154,6 @@ static std::uniform_real_distribution<double> distribution(0.0, 1.0);
 static std::mt19937                           generator;
 double random_double()
 {
-
     return distribution(generator);
 }
 
@@ -163,6 +163,7 @@ int main() {
     std::string str;
     std::cerr << "World seed: ";
     std::getline(std::cin, str);
+
     std::seed_seq seed(str.begin(), str.end());
     generator = std::mt19937(seed);
 
@@ -198,7 +199,7 @@ int main() {
     }
 
     const unsigned threadCount       = std::thread::hardware_concurrency();
-    std::cerr << "Using " << threadCount <<  " threads...\r\n";
+    std::cerr << std::format("Info: Using {} threads.\n", threadCount);
 
     std::vector<std::thread> threads(0);
     for(unsigned i = 0; i < threadCount; i++) {
@@ -214,7 +215,8 @@ int main() {
             break;
         }
 
-        std::cerr << "\rScanlines remaining: " << lineQueue.size() << ' ' << std::flush;
+        std::cerr << std::format("\rScanlines remaining: {}.", lineQueue.size());
+        std::cerr << std::flush;
     }
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -227,6 +229,8 @@ int main() {
         }
     }
 #   else
+    std::cerr << "Info: Using one single thread.\n";
+
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     for(int j = image_height - 1; j >= 0; --j) {
         for(int i = 0; i < image_width; ++i) {
