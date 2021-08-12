@@ -12,17 +12,5 @@ finishes in `50583ms`, or `50s`. With the `NO_THREADING` flag set, it takes abou
 outputs the file about ten times faster than before.
 
 ## Building
-The program uses the meson build system, although it could be easily ported to another one, considering it mostly consists of header files, with only a single
-source file. No external dependencies are used, besides the standard library.
-
-Note: If you somehow want to disable multi-threading (why?), you have to define the preprocessor macro `NO_THREADING`.
-### Linux / WSL
-It is extremely simple to build on linux. If you've never used meson before, make sure it is installed alongside `ninja` on your machine, and execute the 
-following commands in the project root directory:
-```
-meson build
-cd build && ninja
-```
-### Windows
-I haven't tested it yet with a native windows toolchain yet, but if you're using the Microsoft C++ Compiler, before building you should modify in the `build.meson`
-file `cpp_std=c++2a` to `cpp_std=c++latest` then you should be good to go.
+This demo has been ported to CMake. If you'd like to disable multi-threading, define `NO_THREADING`.
+No external dependencies are used.
