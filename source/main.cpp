@@ -274,7 +274,7 @@ int main() {
     auto end  = std::chrono::system_clock::now();
     auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cerr << std::format(
-        "Info: Finished rendering in {}ms/{}s/{}m.\n",
+        "\nInfo: Finished rendering in {}ms/{}s/{}m.\n",
         time.count(),
         time.count() / 1000,
         time.count() / 1000 / 60
@@ -300,6 +300,8 @@ int main() {
         }
 
         file.close();
+
+        std::cerr << std::format("Info: Saved output to '{}'.\n", path);
     };
 
     std::string out = std::format(
