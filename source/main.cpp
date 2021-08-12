@@ -260,7 +260,7 @@ int main() {
 
     // Filename: MM-DD HH:MM:SS
     std::string out = std::format(
-        "{}.{} {}:{}:{}", 
+        "{}-{} {}-{}-{}", 
         calendarTime.tm_mon,
         calendarTime.tm_mday,
         calendarTime.tm_hour,
