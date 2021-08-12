@@ -162,7 +162,7 @@ int main() {
     // Read config from file
     prefs = read_from_file("prefs.cfg");
 
-#if NDEBUG
+#ifndef NDEBUG
     std::cerr << "SoftwareRT (Debug Build)\n";
 #else
     std::cerr << "SoftwareRT (Release Build)\n";
