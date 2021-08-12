@@ -5,6 +5,7 @@
 #include "sphere.h"
 #include "camera.h"
 #include "config.h"
+#include "image.h"
 
 #include <format>
 #include <chrono>
@@ -132,21 +133,7 @@ void WorkerThread(camera& cam, hittable& world)
                 pixel_color += ray_color(r, world, prefs.max_depth);
             }
 
-            auto r = pixel_color.x();
-            auto g = pixel_color.y();
-            auto b = pixel_color.z();
-
-            /* divide the coler by the number of samples */
-            auto scale = 1.0 / prefs.samples_per_pixel;
-            r = sqrt(scale * r);
-            g = sqrt(scale * g);
-            b = sqrt(scale * b);
-
-            pixelAt(pixel.x, pixel.y) = color(
-                256 * clamp(r, 0.0, 0.999),
-                256 * clamp(g, 0.0, 0.999),
-                256 * clamp(b, 0.0, 0.999)
-            );
+            pixelAt(pixel.x, pixel.y) = pixel_color;
         }
     }
 }
@@ -248,21 +235,7 @@ int main() {
                     pixel_color += ray_color(ray, world, prefs.max_depth);
                 }
 
-                auto r = pixel_color.x();
-                auto g = pixel_color.y();
-                auto b = pixel_color.z();
-
-                /* divide the coler by the number of samples */
-                auto scale = 1.0 / prefs.samples_per_pixel;
-                r = sqrt(scale * r);
-                g = sqrt(scale * g);
-                b = sqrt(scale * b);
-
-                pixelAt(i, j) = color(
-                    256 * clamp(r, 0.0, 0.999),
-                    256 * clamp(g, 0.0, 0.999),
-                    256 * clamp(b, 0.0, 0.999)
-                );
+                pixelAt(i, j) = pixel_color;
             }
 
             std::cerr << std::format("\rScanlines remaining: {} ", j);
@@ -282,34 +255,12 @@ int main() {
 
     std::cerr << "Info: Writing output to file.\n";
 
-    auto write_image = [&](const char* path) {
-        std::ofstream file(path);
-        if (!file.is_open()) {
-            std::cerr << std::format("Error: Couldn't write to '{}'.\n", path);
-            return;
-        }
-
-        file << std::format("P3\n{} {}\n255\n", prefs.image_width, prefs.image_height);
-
-        for (int j = prefs.image_height - 1; j >= 0; --j) {
-            for (int i = 0; i < prefs.image_width; ++i) {
-                file << static_cast<int>(pixelAt(i, j).x()) << ' '
-                    << static_cast<int>(pixelAt(i, j).y()) << ' '
-                    << static_cast<int>(pixelAt(i, j).z()) << '\n';
-            }
-        }
-
-        file.close();
-
-        std::cerr << std::format("Info: Saved output to '{}'.\n", path);
-    };
-
     std::string out = std::format(
         "{}.ppm", 
         std::chrono::system_clock::now().time_since_epoch().count()
     );
 
-    write_image(out.c_str());
+    write_as_ppm(pBuffer, prefs, out.c_str());
     
     delete[] pBuffer;
     return 0;
