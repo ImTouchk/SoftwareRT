@@ -108,6 +108,8 @@ void WorkerThread(camera& cam, hittable& world)
     while(true) {
         int line;
 
+        // By adding a new scope the mutex lock gets destroyed
+        // early so another thread can read from the queue faster.
         {
             std::unique_lock<std::mutex> lock(queueMutex);
             if(lineQueue.empty()) {
@@ -138,8 +140,10 @@ void WorkerThread(camera& cam, hittable& world)
     }
 }
 
+// These two need to be static so that 'generator' can be constructed
+// inside main()
 static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-static std::mt19937                           generator;
+static std::mt19937 generator;
 double random_double()
 {
     return distribution(generator);
